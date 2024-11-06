@@ -3,9 +3,7 @@ import { useWeather } from "../../context/WeatherContext"
 
 export default function Cities() {
 
-    const cities = ["İstanbul", "Ankara", "Kocaeli", "Eskişehir", "Bilecik"];
-
-    const { city, setCity } = useWeather();
+    const { city, setCity, cities } = useWeather();
 
     return <div className="search">
         <select onChange={(e) => { setCity(e.target.value); }} value={city}>
