@@ -8,7 +8,7 @@ export default function Cities() {
     return <div className="search">
         <select onChange={(e) => { setCity(e.target.value); }} value={city}>
             {cities.map((citys, index) => {
-                return <option value={citys.toLowerCase()} key={index}>{citys}</option>
+                return <option value={citys.toLowerCase()} key={city+index}>{citys}</option>
             })}
         </select>
     </div>

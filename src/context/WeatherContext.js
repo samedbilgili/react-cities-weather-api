@@ -1,30 +1,16 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-//I found this api key on the internet (github)
-const ApiKey = "0FfahjVhFtYZahAJNm2iN3:2JUqX0tyOMzWLti1jVI3p7"
+const ApiKey = '0FfahjVhFtYZahAJNm2iN3:2JUqX0tyOMzWLti1jVI3p7';
 
 const WeatherContext = createContext({});
 
-// const [location, setLocation] = useState({
-//     country: '',
-//     state: '',
-//     city: '',
-//     latitude: '',
-//     longitude: '',
-//     ip: ''
-// });
-
 export function WeatherProvider({ children }) {
-
-    const [cities, setCities] = useState(["İstanbul", "Ankara", "Kocaeli", "Eskişehir", "Bilecik"]);
-    const [city, setCity] = useState('istanbul');
-    const [weather, setWeather] = useState({});
-
-    // const _city = useCity();
+    const _city = useCity();
+    const [cities, setCities] = useState(["Kocaeli","İstanbul", "Ankara", "Eskişehir", "Bilecik"]);
+    const [city, setCity] = useState(_city ?? 'Kocaeli');
+    const [weather, setWeather] = useState({}); 
 
     useEffect(() => {
-        // console.log(_city);
-
         fetch(`https://api.collectapi.com/weather/getWeather?data.lang=tr&data.city=${city}`, {
             method: "GET",
             headers: {
@@ -34,11 +20,21 @@ export function WeatherProvider({ children }) {
         })
             .then(response => response.json())
             .then(data => { setWeather(data); console.log(data); })
-            .catch(error => console.log(error))
+            .catch(error => console.error("Weather API fetch error:", error));
 
-        return (() => setWeather({}));
+        return () => { setWeather({}) }
 
-    }, [city])
+    }, [city]);
+
+    useEffect(() => {
+        if (_city && !cities.some((x) => x.toLowerCase() == _city.toLowerCase()) && cities.length != 0) {
+            console.log("Your location added on select:", _city);
+            setCities((prevCities) => [_city, ...prevCities]);
+            setCity(_city); // Eklenen konumu otomatik olarak seçiyoruz
+        } else if(_city) {
+            console.log("Your location already added on select");
+        }
+    }, [_city]);
 
     const values = {
         city,
@@ -47,32 +43,33 @@ export function WeatherProvider({ children }) {
         setWeather,
         cities,
         setCities
-    }
+    };
 
-    return <WeatherContext.Provider value={values}>
-        {children}
-    </WeatherContext.Provider>
+    return (
+        <WeatherContext.Provider value={values}>
+            {children}
+        </WeatherContext.Provider>
+    );
 }
 
-// function useCity() {
-//     const [city, setCity] = useState(null);
+function useCity() {
+    const [city, setCity] = useState(null);
 
-//     useEffect(() => {
-//         const fetchLocation = async () => {
-//             try {
-//                 const response = await fetch('https://geolocation-db.com/json/');
-//                 const location = await response.json();
-//                 console.log(location.city);
-//                 setCity(location.city);
-//             } catch (error) {
-//                 console.error("Error fetching location:", error);
-//             }
-//         };
+    useEffect(() => {
+        const fetchLocation = async () => {
+            try {
+                const response = await fetch('https://geolocation-db.com/json/');
+                const location = await response.json();
+                setCity(location.state);
+            } catch (error) {
+                console.error("Error fetching location:", error);
+            }
+        };
 
-//         fetchLocation();
-//     }, []);
+        fetchLocation();
+    }, []);
 
-//     return city;
-// }
+    return city;
+}
 
-export const useWeather = () => { return useContext(WeatherContext); }
+export const useWeather = () => useContext(WeatherContext);
